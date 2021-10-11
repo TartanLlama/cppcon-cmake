@@ -15,6 +15,7 @@ jobs:
     env:
       VCPKG_ROOT: './vcpkg'
       BUILD_TYPE: 'Release'
+      VCPKG_BINARY_SOURCES: 'clear;nuget,GitHub,readwrite'
 
     steps:
       - uses: actions/checkout@v2
@@ -29,6 +30,17 @@ jobs:
 
       - name: 'Setup vcpkg'
         run: ./vcpkg/bootstrap-vcpkg.bat
+
+      - name: 'Setup NuGet Credentials'
+        shell: 'bash'
+        run: >
+          `./vcpkg/vcpkg fetch nuget | tail -n 1`
+          sources add
+          -source "https://nuget.pkg.github.com/tartanllama/index.json"
+          -storepasswordincleartext
+          -name "GitHub"
+          -username "tartanllama"
+          -password "${{ secrets.GITHUB_TOKEN }}"
               
       - name: Configure CMake
         run: cmake -B ${{github.workspace}}/build --preset=windows-default
